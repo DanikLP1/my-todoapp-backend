@@ -1,0 +1,56 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int       @id @default(autoincrement())
+  username    String    @unique
+  email       String    @unique
+  passwordHash String   @map("password_hash")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  hashedRt    String?
+
+  todoLists   TodoList[]
+
+  @@map("users")
+}
+
+model TodoList {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  title     String
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks     Task[]
+
+  @@map("todo_lists")
+}
+
+model Task {
+  id          Int       @id @default(autoincrement())
+  listId      Int
+  title       String
+  description String?
+  dueDate     DateTime?
+  completed   Boolean   @default(false)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  todoList    TodoList  @relation(fields: [listId], references: [id], onDelete: Cascade)
+
+  @@map("tasks")
+}
