@@ -21,7 +21,7 @@ export class AuthService {
             }
         })
 
-        if(user) throw new BadRequestException('User already exists')
+        if(user) throw new BadRequestException('Пользователь с такой электронной почтой уже существует')
 
         const newUser = await this.prisma.user.create({
             data: {
@@ -45,10 +45,10 @@ export class AuthService {
                 ],
             },
         });
-        if(!user) throw new ForbiddenException("Access Denied");
+        if(!user) throw new ForbiddenException("Пользователя не существует");
 
         const passwordMatches = await bcrypt.compare(dto.password, user.passwordHash);
-        if(!passwordMatches) throw new ForbiddenException("Access Denied");
+        if(!passwordMatches) throw new ForbiddenException("Неверный пароль");
 
         const tokens = await this.getTokens(user.id, user.email);
         await this.updateRtHash(user.id, tokens.refresh_token);
@@ -78,10 +78,10 @@ export class AuthService {
                 }
             }
         });
-        if(!user) throw new ForbiddenException("Access Denied");
+        if(!user) throw new ForbiddenException("Пользователя не существует");
 
         const rtMathces = await bcrypt.compare(rt, user.hashedRt);
-        if(!rtMathces) throw new ForbiddenException("Access Denied");
+        if(!rtMathces) throw new ForbiddenException("Доступ запрещен");
 
         const tokens = await this.getTokens(user.id, user.email);
         await this.updateRtHash(user.id, tokens.refresh_token);

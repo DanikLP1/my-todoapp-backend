@@ -27,7 +27,7 @@ export class UsersService {
             });
 
             if (existingUserByEmail && existingUserByEmail.id !== userId) {
-                throw new BadRequestException('User with this email already exists');
+                throw new BadRequestException('Пользователь с такой электронной почтой уже существует');
             }
         }
 
@@ -39,7 +39,7 @@ export class UsersService {
             });
 
             if (existingUserByUsername && existingUserByUsername.id !== userId) {
-                throw new BadRequestException('User with this username already exists');
+                throw new BadRequestException('Пользователь с таким имененм уже существует');
             }
         }
 
