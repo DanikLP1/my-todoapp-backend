@@ -18,12 +18,18 @@ export class TodoListsService {
   async findAll(userId: number) {
     return this.prisma.todoList.findMany({
       where: { userId: userId },
+      include: {
+        tasks: true,
+      }
     });
   }
 
   async findOne(userId: number, id: number) {
     const todoList = await this.prisma.todoList.findFirst({
       where: { id, userId },
+      include: {
+        tasks: true,
+      }
     });
 
     if (!todoList) {
