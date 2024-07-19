@@ -14,4 +14,4 @@ deploy:
         - docker run -d -p 3333:3333 --network danik_backend_network --ip 172.16.0.3 --restart=always --name backend todo-app-backend
         - echo "y" | docker system prune
     only:
-        - main
+        - master
