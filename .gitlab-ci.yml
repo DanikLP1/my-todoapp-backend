@@ -18,7 +18,7 @@ deploy:
         - docker push $CI_REGISTRY/root/$APP_NAME:$CI_PIPELINE_ID
         - docker stop backend || true && docker rm backend || true
         - echo "pushed image $APP_NAME:$CI_PIPELINE_ID"
-        - docker run -d -p 3333:3333 --network danik_backend_network --ip 172.16.0.3 --restart=always --name backend $CI_REGISTRY/root/$APP_NAME:$CI_PIPELINE_ID
+        - docker run -d -p 3333:3333 --network my_network --ip 172.16.0.3 --restart=always --name backend $CI_REGISTRY/root/$APP_NAME:$CI_PIPELINE_ID
         - docker logout $DOCKER_REGISTRY
     only:
         - master
