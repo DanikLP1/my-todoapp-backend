@@ -11,7 +11,7 @@ export class PrismaService
         super({
             datasources: {
                 db: {
-                    url: 'postgresql://postgres:123@localhost:5432/my-todo-app?schema=public',
+                    url: process.env.DATABASE_URL,
                 }
             }
         });

@@ -1,14 +1,15 @@
 import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto, UpdateTaskDto } from './dto';
+import { GetCurrentUserId } from 'src/common/decorators';
 
 @Controller('todolists/:listId/tasks')
 export class TasksController {
     constructor(private readonly taskService: TasksService) {}
   
     @Post()
-    create(@Param('listId') listId: string, @Body() createTaskDto: CreateTaskDto) {
-      return this.taskService.create(+listId, createTaskDto);
+    create(@GetCurrentUserId() userId: number, @Body() createTaskDto: CreateTaskDto) {
+      return this.taskService.create(+userId, createTaskDto);
     }
   
     @Get()
