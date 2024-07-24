@@ -6,7 +6,7 @@ import { CreateTaskDto, UpdateTaskDto } from "./dto";
 export class TasksService {
   constructor(private prisma: PrismaService) {}
 
-  async create(userId: number, createTaskDto: CreateTaskDto) {
+  async create(userId: string, createTaskDto: CreateTaskDto) {
     const { dueDate, ...rest } = createTaskDto;
     console.log(`Original dueDate: ${dueDate}`);
   
@@ -50,23 +50,24 @@ export class TasksService {
     // Создание задачи в найденном или новом списке дел
     return this.prisma.task.create({
       data: {
+        ...rest,
         listId: todoList.id,
-        title: rest.title,
-        description: rest.description,
         dueDate: dueDateUTC, // Используем UTC для сохранения времени
         completed: rest.completed || false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
     });
   }
 
-  async findAll(listId: number) {
+  async findAll(listId: string) {
     if(!this.findTodoLists) throw new NotFoundException("Такого списка задач не существует");
     return this.prisma.task.findMany({
       where: { listId },
     });
   }
 
-  async findOne(listId: number, id: number) {
+  async findOne(listId: string, id: string) {
     if(!this.findTodoLists) throw new NotFoundException("Такого списка задач не существует");
     const task = await this.prisma.task.findFirst({
       where: { id, listId },
@@ -79,16 +80,22 @@ export class TasksService {
     return task;
   }
 
-  async update(listId: number, id: number, updateTaskDto: UpdateTaskDto) {
-    await this.findOne(listId, id);
+  async update(listId: string, id: string, updateTaskDto: UpdateTaskDto) {
+    const findedTask = await this.findOne(listId, id);
+    const { dueDate, ...rest } = updateTaskDto;
+    console.log(`Original dueDate: ${dueDate}`);
+  
+    // Преобразование строки даты в объект Date
+    const dueDateObj = new Date(dueDate);
+    console.log(`Parsed dueDateObj: ${dueDateObj}`);
 
     return this.prisma.task.update({
       where: { id },
-      data: { ...updateTaskDto },
+      data: { ...rest, dueDate: dueDateObj , updatedAt: new Date(), createdAt: findedTask.createdAt},
     });
   }
 
-  async remove(listId: number, id: number) {
+  async remove(listId: string, id: string) {
     await this.findOne(listId, id);
 
     return this.prisma.task.delete({
@@ -96,7 +103,7 @@ export class TasksService {
     });
   }
 
-  async findTodoLists(listId: number) {
+  async findTodoLists(listId: string) {
     return await this.prisma.todoList.findUnique({where: {id: listId}}) ? true : false
   } 
 

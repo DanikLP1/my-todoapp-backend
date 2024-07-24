@@ -6,16 +6,41 @@ import { CreateTodoListDto, UpdateTodoListDto } from './dto';
 export class TodoListsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(userId: number, createTodoListDto: CreateTodoListDto) {
-    return this.prisma.todoList.create({
+  async create(userId: string, createToDoListDto: CreateTodoListDto) {
+    const { tasks, date, ...listData } = createToDoListDto;
+
+    // Преобразование строки даты в объект Date
+    const dateObj = new Date(date);
+
+    // Создание списка дел
+    const todoList = await this.prisma.todoList.create({
       data: {
-        ...createTodoListDto,
+        title: createToDoListDto.title,
+        date: dateObj,
         user: { connect: { id: userId } },
       },
     });
+
+    // Если задачи присутствуют, создаем их и связываем с новым списком дел
+    if (tasks && tasks.length > 0) {
+      const taskPromises = tasks.map(task => this.prisma.task.create({
+        data: {
+          title: task.title,
+          dueDate: task.dueDate ? new Date(task.dueDate) : null,
+          description: task.description,
+          listId: todoList.id,
+        },
+      }));
+      await Promise.all(taskPromises);
+    }
+
+    return this.prisma.todoList.findUnique({
+      where: { id: todoList.id },
+      include: { tasks: true },
+    });
   }
 
-  async findAll(userId: number) {
+  async findAll(userId: string) {
     return this.prisma.todoList.findMany({
       where: { userId: userId },
       include: {
@@ -24,7 +49,7 @@ export class TodoListsService {
     });
   }
 
-  async findOne(userId: number, id: number) {
+  async findOne(userId: string, id: string) {
     const todoList = await this.prisma.todoList.findFirst({
       where: { id, userId },
       include: {
@@ -39,7 +64,7 @@ export class TodoListsService {
     return todoList;
   }
 
-  async update(userId: number, id: number, updateTodoListDto: UpdateTodoListDto) {
+  async update(userId: string, id: string, updateTodoListDto: UpdateTodoListDto) {
     await this.findOne(userId, id);
 
     return this.prisma.todoList.update({
@@ -48,7 +73,7 @@ export class TodoListsService {
     });
   }
 
-  async remove(userId: number, id: number) {
+  async remove(userId: string, id: string) {
     await this.findOne(userId, id);
 
     return this.prisma.todoList.delete({

@@ -11,17 +11,17 @@ export class UsersController {
     ) {}
 
     @Get('')
-    getUser(@GetCurrentUserId() userId: number) {
+    getUser(@GetCurrentUserId() userId: string) {
         return this.userService.getUser(userId);
     }
 
     @Put('')
-    updateUser(@GetCurrentUserId() userId: number, @Body()dto: UpdateUserDto) {
+    updateUser(@GetCurrentUserId() userId: string, @Body()dto: UpdateUserDto) {
         return this.userService.updateUser(userId, dto);
     }
 
     @Delete('') 
-    deleteUser(@GetCurrentUserId() userId: number) {
+    deleteUser(@GetCurrentUserId() userId: string) {
         return this.userService.deleteUser(userId);
     }
 }

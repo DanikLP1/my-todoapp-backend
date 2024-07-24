@@ -8,27 +8,27 @@ export class TasksController {
     constructor(private readonly taskService: TasksService) {}
   
     @Post()
-    create(@GetCurrentUserId() userId: number, @Body() createTaskDto: CreateTaskDto) {
-      return this.taskService.create(+userId, createTaskDto);
+    create(@GetCurrentUserId() userId: string, @Body() createTaskDto: CreateTaskDto) {
+      return this.taskService.create(userId, createTaskDto);
     }
   
     @Get()
     findAll(@Param('listId') listId: string) {
-      return this.taskService.findAll(+listId);
+      return this.taskService.findAll(listId);
     }
   
     @Get(':id')
     findOne(@Param('listId') listId: string, @Param('id') id: string) {
-      return this.taskService.findOne(+listId, +id);
+      return this.taskService.findOne(listId, id);
     }
   
     @Put(':id')
     update(@Param('listId') listId: string, @Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto) {
-      return this.taskService.update(+listId, +id, updateTaskDto);
+      return this.taskService.update(listId, id, updateTaskDto);
     }
   
     @Delete(':id')
     remove(@Param('listId') listId: string, @Param('id') id: string) {
-      return this.taskService.remove(+listId, +id);
+      return this.taskService.remove(listId, id);
     }
   }

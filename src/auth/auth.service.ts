@@ -55,7 +55,7 @@ export class AuthService {
         return tokens;
     }
 
-    async logout(userId: number) {
+    async logout(userId: string) {
         await this.prisma.user.updateMany({
             where: {
                 id: userId,
@@ -69,7 +69,7 @@ export class AuthService {
         });
     }
 
-    async refreshTokens(userId: number, rt: string) {
+    async refreshTokens(userId: string, rt: string) {
         const user = await this.prisma.user.findUnique({
             where: {
                 id: userId,
@@ -88,7 +88,7 @@ export class AuthService {
         return tokens;
     }
 
-    async updateRtHash(userId: number, rt: string) {
+    async updateRtHash(userId: string, rt: string) {
         const hash = await this.hashData(rt);
         await this.prisma.user.update({
             where: {
@@ -104,20 +104,20 @@ export class AuthService {
         return bcrypt.hash(data, 10);
     }
 
-    async getTokens(userId: number, email: string) {
+    async getTokens(userId: string, email: string) {
         const [at, rt] = await Promise.all([
             this.jwtService.signAsync({
                 sub: userId,
                 email: email,
             }, {
-                secret: 'at-secret',
+                secret: process.env.AT_SECRET,
                 expiresIn: 60 * 15,
             }),
             this.jwtService.signAsync({
                 sub: userId,
                 email: email,
             }, {
-                secret: 'rt-secret',
+                secret: process.env.RT_SECRET,
                 expiresIn: 60 * 60 * 24 * 7,
             }),
         ]);

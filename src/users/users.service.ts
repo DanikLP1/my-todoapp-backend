@@ -10,7 +10,7 @@ export class UsersService {
         private prisma: PrismaService
     ) {}
 
-    async getUser(userId: number): Promise<UserModel> {
+    async getUser(userId: string): Promise<UserModel> {
         return this.prisma.user.findUnique({
             where: {
                 id: userId,
@@ -18,7 +18,7 @@ export class UsersService {
         });
     }
 
-    async updateUser(userId: number, dto: UpdateUserDto) {
+    async updateUser(userId: string, dto: UpdateUserDto) {
         if (dto.email) {
             const existingUserByEmail = await this.prisma.user.findUnique({
                 where: {
@@ -59,7 +59,7 @@ export class UsersService {
         });
     }
 
-    async deleteUser(userId: number) {
+    async deleteUser(userId: string) {
         return await this.prisma.user.delete({
             where: {
                 id: userId
