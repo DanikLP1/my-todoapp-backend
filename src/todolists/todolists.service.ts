@@ -11,12 +11,16 @@ export class TodoListsService {
 
     // Преобразование строки даты в объект Date
     const dateObj = new Date(date);
+    const dueDateUTC = new Date(Date.UTC(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate(), dateObj.getHours(), dateObj.getMinutes(), dateObj.getSeconds(), dateObj.getMilliseconds()));
 
     // Создание списка дел
     const todoList = await this.prisma.todoList.create({
       data: {
+        id: listData.id,
         title: createToDoListDto.title,
-        date: dateObj,
+        date: dueDateUTC,
+        createdAt: new Date(),
+        updatedAt: new Date(),
         user: { connect: { id: userId } },
       },
     });
@@ -25,8 +29,9 @@ export class TodoListsService {
     if (tasks && tasks.length > 0) {
       const taskPromises = tasks.map(task => this.prisma.task.create({
         data: {
+          id: task.id,
           title: task.title,
-          dueDate: task.dueDate ? new Date(task.dueDate) : null,
+          dueDate: dueDateUTC,
           description: task.description,
           listId: todoList.id,
         },

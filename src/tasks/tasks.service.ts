@@ -7,23 +7,19 @@ export class TasksService {
   constructor(private prisma: PrismaService) {}
 
   async create(userId: string, createTaskDto: CreateTaskDto) {
-    const { dueDate, ...rest } = createTaskDto;
+    const { dueDate, id, listId, ...rest } = createTaskDto;
     console.log(`Original dueDate: ${dueDate}`);
   
-    // Преобразование строки даты в объект Date
     const dueDateObj = new Date(dueDate);
     console.log(`Parsed dueDateObj: ${dueDateObj}`);
   
-    // Преобразование даты в начало и конец дня в локальном часовом поясе
     const startOfDay = new Date(dueDateObj.getFullYear(), dueDateObj.getMonth(), dueDateObj.getDate());
     const endOfDay = new Date(dueDateObj.getFullYear(), dueDateObj.getMonth(), dueDateObj.getDate(), 23, 59, 59, 999);
   
-    // Преобразование в UTC
     const startOfDayUTC = new Date(Date.UTC(startOfDay.getFullYear(), startOfDay.getMonth(), startOfDay.getDate()));
     const endOfDayUTC = new Date(Date.UTC(endOfDay.getFullYear(), endOfDay.getMonth(), endOfDay.getDate(), 23, 59, 59, 999));
     const dueDateUTC = new Date(Date.UTC(dueDateObj.getFullYear(), dueDateObj.getMonth(), dueDateObj.getDate(), dueDateObj.getHours(), dueDateObj.getMinutes(), dueDateObj.getSeconds(), dueDateObj.getMilliseconds()));
   
-    // Проверка наличия списка дел с указанной датой
     let todoList = await this.prisma.todoList.findFirst({
       where: {
         userId: userId,
@@ -34,10 +30,11 @@ export class TasksService {
       },
     });
   
-    // Если список дел не найден, создаем новый
     if (!todoList) {
       todoList = await this.prisma.todoList.create({
         data: {
+          ...rest,
+          id: listId,
           title: `Список дел на ${startOfDayUTC.toISOString().split('T')[0]}`,
           date: startOfDayUTC,
           createdAt: new Date(),
@@ -47,18 +44,20 @@ export class TasksService {
       });
     }
   
-    // Создание задачи в найденном или новом списке дел
     return this.prisma.task.create({
       data: {
         ...rest,
-        listId: todoList.id,
-        dueDate: dueDateUTC, // Используем UTC для сохранения времени
+        id: id, // Позволяет задавать ID
+        listId: todoList.id ? todoList.id : listId, // Использует переданный listId или тот, что был создан
+        dueDate: dueDateUTC,
         completed: rest.completed || false,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
     });
   }
+  
+
 
   async findAll(listId: string) {
     if(!this.findTodoLists) throw new NotFoundException("Такого списка задач не существует");
